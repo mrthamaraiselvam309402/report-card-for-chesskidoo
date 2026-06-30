@@ -119,8 +119,6 @@
   select:focus, input:focus, textarea:focus { border-color: var(--accent-yellow); background: #FFF; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.12); }
   textarea { resize: vertical; min-height: 85px; line-height: 1.6; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-  .row3 { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 14px; }
-  @media (max-width: 600px) { .row3 { grid-template-columns: 1fr; } }
 
   hr.divider { border: none; border-top: 2px dashed var(--line); margin: 28px 0 24px; }
 
@@ -363,13 +361,11 @@
         </div>
       </div>
 
-      <div class="row3">
-        <div class="field"><label for="reportMonth">Report Month</label><input type="month" id="reportMonth" /></div>
-        <div class="field"><label for="fromDate">From Date</label><input type="date" id="fromDate" /></div>
-        <div class="field"><label for="toDate">To Date</label><input type="date" id="toDate" /></div>
-      </div>
-
       <div class="row2">
+        <div class="field">
+          <label for="reportMonth">Report Month</label>
+          <input type="month" id="reportMonth" />
+        </div>
         <div class="field">
           <label for="themeSelect">Report Theme Color</label>
           <select id="themeSelect">
@@ -380,10 +376,22 @@
             <option value="grandmaster">Charcoal Grandmaster (Slate & Silver)</option>
           </select>
         </div>
+      </div>
+
+      <div class="row2">
         <div class="field">
-          <label for="topics">Topics Covered <span class="hint">e.g. Italian Game</span></label>
-          <input type="text" id="topics" placeholder="What did you teach this session?" />
+          <label for="fromDate">From Date</label>
+          <input type="date" id="fromDate" />
         </div>
+        <div class="field">
+          <label for="toDate">To Date</label>
+          <input type="date" id="toDate" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="topics">Topics Covered <span class="hint">e.g. Italian Game</span></label>
+        <input type="text" id="topics" placeholder="What did you teach this session?" />
       </div>
 
       <hr class="divider">
