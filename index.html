@@ -197,8 +197,6 @@
   }
   .view-bar-btn.print-btn { background: var(--accent-orange); color: #fff; }
   .view-bar-btn.print-btn:hover { background: var(--accent-yellow); }
-  .view-bar-btn.edit-btn { background: rgba(255,255,255,0.15); color: #fff; }
-  .view-bar-btn.edit-btn:hover { background: rgba(255,255,255,0.25); }
 
   /* ---------- VIEW MODE BODY OVERRIDES ---------- */
   body.view-mode .form-panel,
@@ -313,7 +311,6 @@
     <span>ChessKidoo Academy Progress Report View</span>
     <div style="display: flex; gap: 10px;">
       <button class="view-bar-btn print-btn" id="viewPrintBtn">🖨️ Print / Save PDF</button>
-      <button class="view-bar-btn edit-btn" id="viewEditBtn">⚙️ Switch to Editor</button>
     </div>
   </div>
 
@@ -821,14 +818,22 @@
   document.getElementById("generateBtn").addEventListener("click", function(){
     var coach = document.getElementById("coachSelect").value.trim();
     var student = document.getElementById("studentSelect").value.trim();
-    if(!coach){ alert("Please select or type a coach name."); return; }
-    if(!student){ alert("Please select or type a student name."); return; }
+    
+    // Skip coach/student empty validation alerts in View Mode
+    if(!coach){ 
+      if (!document.body.classList.contains("view-mode")) alert("Please select or type a coach name."); 
+      return; 
+    }
+    if(!student){ 
+      if (!document.body.classList.contains("view-mode")) alert("Please select or type a student name."); 
+      return; 
+    }
 
     var sessionDate = document.getElementById("sessionDate").value;
     var nextDate = document.getElementById("nextDate").value;
     
-    // Validation: Check if next class date is prior to session date
-    if (sessionDate && nextDate) {
+    // Validation: Check if next class date is prior to session date (Skip in View Mode)
+    if (sessionDate && nextDate && !document.body.classList.contains("view-mode")) {
       var dSession = new Date(sessionDate + "T00:00:00");
       var dNext = new Date(nextDate + "T00:00:00");
       if (!isNaN(dSession.getTime()) && !isNaN(dNext.getTime()) && dNext < dSession) {
@@ -885,7 +890,10 @@
     document.getElementById("shareParentBtn").disabled = false;
     document.getElementById("shareCoachBtn").disabled = false;
     
-    showToast("Report updated successfully!");
+    // Hide toast notifications in View Mode
+    if (!document.body.classList.contains("view-mode")) {
+      showToast("Report updated successfully!");
+    }
 
     // Smooth scroll to preview panel on mobile if NOT in View Mode
     if (window.innerWidth <= 980 && !document.body.classList.contains("view-mode")) {
@@ -1008,12 +1016,6 @@
   // View Mode Actions event listeners
   document.getElementById("viewPrintBtn").addEventListener("click", function() {
     window.print();
-  });
-
-  document.getElementById("viewEditBtn").addEventListener("click", function() {
-    document.body.classList.remove("view-mode");
-    document.getElementById("viewModeBar").style.display = "none";
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
 })();
