@@ -126,6 +126,9 @@
   .section-title .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-red); display: inline-block; }
   .section-note { font-size: 13px; color: var(--text-muted); margin: 0 0 20px; line-height: 1.5; font-weight: 600; }
 
+  #topicsCheckboxContainer label { transition: background 0.15s; border-radius: 6px; }
+  #topicsCheckboxContainer label:hover { background: #EEF2FF; }
+
   /* ---------- STAR RATINGS ---------- */
   .rating-row {
     display: flex; justify-content: space-between; align-items: center;
@@ -440,8 +443,10 @@
       </div>
 
       <div class="field">
-        <label for="topics">Topics Covered <span class="hint">Auto-filled when level is selected (editable)</span></label>
-        <input type="text" id="topics" placeholder="Select a level above or type topics manually…" />
+        <label>Topics Covered <span class="hint">Select from curriculum below or add custom topics in textarea</span></label>
+        <div id="topicsCheckboxContainer" style="display: none; background: #F8FAFC; border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 12px; max-height: 300px; overflow-y: auto;">
+        </div>
+        <textarea id="topics" rows="3" placeholder="Selected topics will appear here. You can also type custom topics manually…" style="margin-top: 8px;"></textarea>
       </div>
 
       <hr class="divider">
@@ -813,13 +818,87 @@
     ]
   };
 
-  // Auto-fill topics when current level changes
+  function syncTopicsFromCheckboxes() {
+    var container = document.getElementById("topicsCheckboxContainer");
+    var checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    var selected = [];
+    checkboxes.forEach(function(cb) {
+      if (cb.checked) selected.push(cb.value);
+    });
+    var topicsInput = document.getElementById("topics");
+    var manual = topicsInput.value.trim();
+    var manualLines = manual ? manual.split(",").map(function(s){ return s.trim(); }).filter(Boolean) : [];
+    var combined = selected.concat(manualLines);
+    var unique = [];
+    var seen = {};
+    combined.forEach(function(item) {
+      if (!seen[item]) { seen[item] = true; unique.push(item); }
+    });
+    topicsInput.value = unique.join(", ");
+  }
+
+  function clearTopicsCheckboxes() {
+    var container = document.getElementById("topicsCheckboxContainer");
+    container.innerHTML = "";
+    container.style.display = "none";
+  }
+
   document.getElementById("currentLevel").addEventListener("change", function() {
     var level = this.value;
+    var container = document.getElementById("topicsCheckboxContainer");
     var topicsInput = document.getElementById("topics");
+    
+    clearTopicsCheckboxes();
+    
     if (level && CURRICULUM[level]) {
+      container.innerHTML = "";
+      container.style.display = "block";
+      
+      var header = document.createElement("div");
+      header.className = "section-title";
+      header.style.marginBottom = "12px";
+      header.innerHTML = "<span class=\"pip\"></span>" + esc(level) + " Curriculum Topics";
+      container.appendChild(header);
+      
+      CURRICULUM[level].forEach(function(topic) {
+        var label = document.createElement("label");
+        label.style.cssText = "display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-main);";
+        
+        var cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.value = topic;
+        cb.style.cssText = "width: 16px; height: 16px; accent-color: var(--accent-orange); cursor: pointer;";
+        
+        cb.addEventListener("change", syncTopicsFromCheckboxes);
+        
+        label.appendChild(cb);
+        label.appendChild(document.createTextNode(topic));
+        container.appendChild(label);
+      });
+      
       topicsInput.value = CURRICULUM[level].join(", ");
-      showToast("Topics auto-filled for " + level + " level!");
+      showToast(level + " topics loaded — select or edit as needed!");
+    }
+  });
+
+  document.getElementById("topics").addEventListener("input", function() {
+    syncTopicsFromCheckboxes();
+  });
+
+  // Also update topics when next level changes to allow cross-level selection
+  document.getElementById("nextLevel").addEventListener("change", function() {
+    var level = this.value;
+    if (level && CURRICULUM[level]) {
+      var topicsInput = document.getElementById("topics");
+      var current = topicsInput.value.trim();
+      if (!current) {
+        topicsInput.value = CURRICULUM[level].join(", ");
+        showToast("Next level topics pre-filled!");
+      } else {
+        var newTopics = Array.from(new Set(current.split(",").map(function(s){ return s.trim(); }).filter(Boolean).concat(CURRICULUM[level])));
+        topicsInput.value = newTopics.join(", ");
+        showToast(level + " topics added!");
+      }
     }
   });
 
@@ -1152,6 +1231,7 @@
     if (confirm("Are you sure you want to clear the student details and ratings?")) {
       document.getElementById("studentSelect").value = "";
       document.getElementById("topics").value = "";
+      clearTopicsCheckboxes();
       document.getElementById("strengths").value = "";
       document.getElementById("improve").value = "";
       document.getElementById("homework").value = "";
