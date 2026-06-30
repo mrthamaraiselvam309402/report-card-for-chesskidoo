@@ -440,8 +440,8 @@
       </div>
 
       <div class="field">
-        <label for="topics">Topics Covered <span class="hint">e.g. Italian Game</span></label>
-        <input type="text" id="topics" placeholder="What did you teach this session?" />
+        <label for="topics">Topics Covered <span class="hint">Auto-filled when level is selected (editable)</span></label>
+        <input type="text" id="topics" placeholder="Select a level above or type topics manually…" />
       </div>
 
       <hr class="divider">
@@ -758,8 +758,70 @@
 
   // Restore Theme on load
   var savedTheme = localStorage.getItem('chesskidoo_theme') || 'classic';
-  document.getElementById('themeSelect').value = savedTheme;
+  document.getElementById("themeSelect").value = savedTheme;
   applyTheme(savedTheme);
+
+  // ---------- CURRICULUM DATA ----------
+  var CURRICULUM = {
+    "Beginner": [
+      "Chess Board Setup & Piece Movement",
+      "Rules of Chess and Special Moves",
+      "Basic Checkmate Patterns",
+      "Piece Values and Capturing Techniques",
+      "Opening Principles",
+      "Simple Tactical Ideas (Fork, Pin, Skewer)",
+      "King Safety",
+      "Basic Endgames",
+      "Notation and Recording Moves",
+      "Practice Games & Analysis"
+    ],
+    "Intermediate": [
+      "Advanced Tactical Combinations",
+      "Opening Repertoire Development",
+      "Middlegame Planning",
+      "Positional Understanding",
+      "Pawn Structures and Weaknesses",
+      "Attack and Defense Techniques",
+      "Endgame Strategies",
+      "Time Management in Tournaments",
+      "Game Analysis and Error Correction",
+      "Tournament Preparation & Rating Growth"
+    ],
+    "Advanced": [
+      "Advanced Opening Preparation",
+      "Tactical Calculation & Combination Training",
+      "Positional Understanding and Strategy",
+      "Middlegame Planning and Decision Making",
+      "Advanced Endgame Techniques",
+      "Time Management in Classical & Rapid Games",
+      "Candidate Move Selection Process",
+      "FIDE Tournament Preparation",
+      "Game Analysis with Engine Support",
+      "Rating Improvement and Performance Strategies"
+    ],
+    "Elite": [
+      "Opening Preparation for titled players",
+      "Deep Tactical Calculation & Complex Combinations",
+      "Advanced Positional Strategy & Planning",
+      "Middlegame Dynamics in Elite Games",
+      "Expert Endgame Technique",
+      "Psychological Preparation for Tournaments",
+      "Advanced Time Management",
+      "Game Analysis with Super GM Review",
+      "Peak Performance Strategies",
+      "Elite Tournament Preparation"
+    ]
+  };
+
+  // Auto-fill topics when current level changes
+  document.getElementById("currentLevel").addEventListener("change", function() {
+    var level = this.value;
+    var topicsInput = document.getElementById("topics");
+    if (level && CURRICULUM[level]) {
+      topicsInput.value = CURRICULUM[level].join(", ");
+      showToast("Topics auto-filled for " + level + " level!");
+    }
+  });
 
   // ---------- BUILD RATING ROWS (STARS) ----------
   var ratingsList = document.getElementById("ratingsList");
