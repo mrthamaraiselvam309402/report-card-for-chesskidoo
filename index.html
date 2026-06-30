@@ -111,7 +111,7 @@
   .field label .required { color: var(--accent-red); margin-left: 4px; }
   .field label .hint { font-family: var(--font-sans); font-weight: 400; color: var(--text-muted); font-size: 12px; margin-left: 6px; }
 
-  select, input[type="text"], input[type="date"], textarea {
+  select, input, textarea {
     width: 100%; border: 2px solid var(--line); border-radius: 12px;
     background: #F8FAFC; color: var(--text-main); padding: 12px 16px; font-family: var(--font-sans);
     font-size: 14px; outline: none; transition: all 0.2s ease; font-weight: 600;
@@ -119,6 +119,9 @@
   select:focus, input:focus, textarea:focus { border-color: var(--accent-yellow); background: #FFF; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.12); }
   textarea { resize: vertical; min-height: 85px; line-height: 1.6; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .row3 { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 600px) { .row3 { grid-template-columns: 1fr; } }
+
   hr.divider { border: none; border-top: 2px dashed var(--line); margin: 28px 0 24px; }
 
   .section-title { font-family: var(--font-heading); font-weight: 800; font-size: 17px; margin: 0 0 6px; display: flex; align-items: center; gap: 10px; color: var(--primary-navy); }
@@ -355,9 +358,10 @@
         </div>
       </div>
 
-      <div class="row2">
-        <div class="field"><label for="sessionDate">Session Date</label><input type="date" id="sessionDate" /></div>
-        <div class="field"><label for="nextDate">Next Session</label><input type="date" id="nextDate" /></div>
+      <div class="row3">
+        <div class="field"><label for="reportMonth">Report Month</label><input type="month" id="reportMonth" /></div>
+        <div class="field"><label for="fromDate">From Date</label><input type="date" id="fromDate" /></div>
+        <div class="field"><label for="toDate">To Date</label><input type="date" id="toDate" /></div>
       </div>
 
       <div class="row2">
@@ -605,8 +609,31 @@
     localStorage.setItem('chesskidoo_coach_phone', this.value.trim());
   });
 
+  // ---------- INITIALIZE DEFAULT MONTH AND DATES ----------
   var today = new Date();
-  document.getElementById("sessionDate").value = today.toISOString().slice(0,10);
+  var currentYear = today.getFullYear();
+  var currentMonth = today.getMonth() + 1;
+  var currentMonthStr = currentMonth < 10 ? "0" + currentMonth : currentMonth;
+  
+  document.getElementById("reportMonth").value = currentYear + "-" + currentMonthStr;
+  document.getElementById("fromDate").value = currentYear + "-" + currentMonthStr + "-01";
+  
+  var lastDay = new Date(currentYear, currentMonth, 0).getDate();
+  document.getElementById("toDate").value = currentYear + "-" + currentMonthStr + "-" + (lastDay < 10 ? "0" + lastDay : lastDay);
+
+  // Auto-calculate start/end dates when month selection changes
+  document.getElementById("reportMonth").addEventListener("change", function() {
+    var val = this.value;
+    if (!val) return;
+    var parts = val.split("-");
+    var year = parseInt(parts[0], 10);
+    var month = parseInt(parts[1], 10);
+    var monthStr = month < 10 ? "0" + month : month;
+    
+    document.getElementById("fromDate").value = year + "-" + monthStr + "-01";
+    var lastDay = new Date(year, month, 0).getDate();
+    document.getElementById("toDate").value = year + "-" + monthStr + "-" + (lastDay < 10 ? "0" + lastDay : lastDay);
+  });
 
   // ---------- THEMES SYSTEM ----------
   var THEMES = {
@@ -706,6 +733,22 @@
     return "Not Rated";
   }
 
+  function fmtMonth(val) {
+    if (!val) return "—";
+    var parts = val.split("-");
+    if (parts.length !== 2) return val;
+    var year = parts[0];
+    var monthNum = parseInt(parts[1], 10);
+    var monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    if (monthNum >= 1 && monthNum <= 12) {
+      return monthNames[monthNum - 1] + " " + year;
+    }
+    return val;
+  }
+
   // Escape HTML helper
   function esc(s){ 
     if (!s) return "";
@@ -766,7 +809,9 @@
   function buildWhatsAppMessage() {
     var student = document.getElementById("studentSelect").value.trim() || "Student";
     var coach = document.getElementById("coachSelect").value.trim() || "Coach";
-    var sessionDate = document.getElementById("sessionDate").value;
+    var reportMonth = document.getElementById("reportMonth").value;
+    var fromDate = document.getElementById("fromDate").value;
+    var toDate = document.getElementById("toDate").value;
     var reportLink = document.getElementById("reportLink").value.trim();
 
     // Calculate rating details
@@ -784,7 +829,6 @@
     var finalLink = reportLink;
     if (!finalLink) {
       var currentUrl = window.location.href.split('?')[0];
-      var nextDate = document.getElementById("nextDate").value;
       var topics = document.getElementById("topics").value.trim();
       var strengths = document.getElementById("strengths").value.trim();
       var improve = document.getElementById("improve").value.trim();
@@ -794,8 +838,9 @@
 
       finalLink = currentUrl + "?c=" + encodeURIComponent(coach) +
                                 "&s=" + encodeURIComponent(student) +
-                                "&sd=" + encodeURIComponent(sessionDate) +
-                                "&nd=" + encodeURIComponent(nextDate) +
+                                "&m=" + encodeURIComponent(reportMonth) +
+                                "&fd=" + encodeURIComponent(fromDate) +
+                                "&td=" + encodeURIComponent(toDate) +
                                 "&t=" + encodeURIComponent(topics) +
                                 "&st=" + encodeURIComponent(strengths) +
                                 "&im=" + encodeURIComponent(improve) +
@@ -806,7 +851,7 @@
 
     var msg = "*ChessKidoo Academy Progress Report* ♟️🏆\n\n";
     msg += "Dear Parent,\n\n";
-    msg += "Here is the chess session progress report for *" + student + "* from Coach *" + coach + "* on *" + fmtDate(sessionDate) + "*.\n\n";
+    msg += "Here is the chess session progress report for *" + student + "* from Coach *" + coach + "* for *" + fmtMonth(reportMonth) + "* (Period: " + fmtDate(fromDate) + " to " + fmtDate(toDate) + ").\n\n";
     msg += "*Overall Performance:* " + avgText + "\n\n";
     msg += "Click the link below to view the interactive report card and download the PDF:\n" + finalLink + "\n\n";
     msg += "Thank you for choosing ChessKidoo! 🌟";
@@ -829,15 +874,16 @@
       return; 
     }
 
-    var sessionDate = document.getElementById("sessionDate").value;
-    var nextDate = document.getElementById("nextDate").value;
+    var reportMonth = document.getElementById("reportMonth").value;
+    var fromDate = document.getElementById("fromDate").value;
+    var toDate = document.getElementById("toDate").value;
     
-    // Validation: Check if next class date is prior to session date (Skip in View Mode)
-    if (sessionDate && nextDate && !document.body.classList.contains("view-mode")) {
-      var dSession = new Date(sessionDate + "T00:00:00");
-      var dNext = new Date(nextDate + "T00:00:00");
-      if (!isNaN(dSession.getTime()) && !isNaN(dNext.getTime()) && dNext < dSession) {
-        alert("Warning: Next Session date is before the Session Date.");
+    // Validation: Check if toDate is prior to fromDate (Skip in View Mode)
+    if (fromDate && toDate && !document.body.classList.contains("view-mode")) {
+      var dFrom = new Date(fromDate + "T00:00:00");
+      var dTo = new Date(toDate + "T00:00:00");
+      if (!isNaN(dFrom.getTime()) && !isNaN(dTo.getTime()) && dTo < dFrom) {
+        alert("Warning: To Date is before the From Date.");
       }
     }
 
@@ -870,7 +916,7 @@
       '<div id="report-card">' +
         '<div class="rc-top">' +
           '<div class="rc-brand"><img src="' + currentLogo + '" id="reportLogo" alt="ChessKidoo"></div>' +
-          '<div class="rc-meta"><div>Session: <b>'+fmtDate(sessionDate)+'</b></div><div>Next class: <b>'+fmtDate(nextDate)+'</b></div><div>Coach: <b>'+esc(coach)+'</b></div></div>' +
+          '<div class="rc-meta"><div>Month: <b>'+fmtMonth(reportMonth)+'</b></div><div>Period: <b>'+fmtDate(fromDate)+' to '+fmtDate(toDate)+'</b></div><div>Coach: <b>'+esc(coach)+'</b></div></div>' +
         '</div>' +
         '<div class="rc-student">' +
           '<div><h2>'+esc(student)+'</h2><div class="sub">Topics covered: <span>'+(topics?esc(topics):'—')+'</span></div></div>' +
@@ -932,10 +978,19 @@
       document.getElementById("strengths").value = "";
       document.getElementById("improve").value = "";
       document.getElementById("homework").value = "";
-      document.getElementById("nextDate").value = "";
       document.getElementById("parentPhone").value = "";
       document.getElementById("reportLink").value = "";
       
+      // Reset dates to current month
+      var today = new Date();
+      var currentYear = today.getFullYear();
+      var currentMonth = today.getMonth() + 1;
+      var currentMonthStr = currentMonth < 10 ? "0" + currentMonth : currentMonth;
+      document.getElementById("reportMonth").value = currentYear + "-" + currentMonthStr;
+      document.getElementById("fromDate").value = currentYear + "-" + currentMonthStr + "-01";
+      var lastDay = new Date(currentYear, currentMonth, 0).getDate();
+      document.getElementById("toDate").value = currentYear + "-" + currentMonthStr + "-" + (lastDay < 10 ? "0" + lastDay : lastDay);
+
       // Clear ratings state
       ratings = {};
       
@@ -965,8 +1020,9 @@
   // ---------- EXPORT PDF USING NATIVE BROWSER PRINT ----------
   document.getElementById("pdfBtn").addEventListener("click", function(){
     var studentName = document.getElementById("studentSelect").value.trim() || "Student";
-    var dateStr = (document.getElementById("sessionDate").value || "").replace(/-/g,"");
-    var fileName = "ChessKidoo_Report_" + studentName.replace(/[^a-z0-9]+/gi,"_").replace(/_+/g, "_") + (dateStr ? "_"+dateStr : "");
+    var monthVal = document.getElementById("reportMonth").value || "";
+    var monthStr = monthVal.replace(/-/g,"_");
+    var fileName = "ChessKidoo_Report_" + studentName.replace(/[^a-z0-9]+/gi,"_").replace(/_+/g, "_") + (monthStr ? "_"+monthStr : "");
     
     var originalTitle = document.title;
     document.title = fileName;
@@ -985,8 +1041,9 @@
     // Populate form fields behind the scenes
     document.getElementById("coachSelect").value = params.c;
     document.getElementById("studentSelect").value = params.s;
-    if (params.sd) document.getElementById("sessionDate").value = params.sd;
-    if (params.nd) document.getElementById("nextDate").value = params.nd;
+    if (params.m) document.getElementById("reportMonth").value = params.m;
+    if (params.fd) document.getElementById("fromDate").value = params.fd;
+    if (params.td) document.getElementById("toDate").value = params.td;
     if (params.t) document.getElementById("topics").value = params.t;
     if (params.st) document.getElementById("strengths").value = params.st;
     if (params.im) document.getElementById("improve").value = params.im;
