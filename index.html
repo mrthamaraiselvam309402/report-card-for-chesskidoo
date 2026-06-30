@@ -275,6 +275,33 @@
   .rc-homework h4 { margin: 0 0 10px; font-family: var(--font-heading); font-weight: 800; font-size: 15px; color: var(--accent-yellow); }
   .rc-homework p { margin: 0; font-size: 13px; line-height: 1.7; color: #E2E8F0; white-space: pre-wrap; font-weight: 600; }
 
+  .rc-commitment { background: #FFFBEB; border: 1px dashed #F59E0B; border-radius: 14px; padding: 22px; margin-bottom: 28px; }
+  .rc-commitment h4 { margin: 0 0 10px; font-family: var(--font-heading); font-weight: 800; font-size: 15px; color: #D97706; display: flex; align-items: center; gap: 8px; }
+  .rc-commitment h4::before { content: "🤝"; }
+  .rc-commitment p { margin: 0; font-size: 13px; line-height: 1.7; color: #78350F; white-space: pre-wrap; font-weight: 600; }
+
+  .rc-goals { background: #F0FDF4; border: 1px solid #4ADE80; border-radius: 14px; padding: 22px; margin-bottom: 28px; }
+  .rc-goals h4 { margin: 0 0 10px; font-family: var(--font-heading); font-weight: 800; font-size: 15px; color: #166534; display: flex; align-items: center; gap: 8px; }
+  .rc-goals h4::before { content: "🌟"; }
+  .rc-goals p { margin: 0; font-size: 13px; line-height: 1.7; color: #14532D; white-space: pre-wrap; font-weight: 600; }
+
+  .rc-next-month { background: #FDF2F8; border: 1px solid #F472B6; border-radius: 14px; padding: 22px; margin-bottom: 28px; }
+  .rc-next-month h4 { margin: 0 0 10px; font-family: var(--font-heading); font-weight: 800; font-size: 15px; color: #9D174D; display: flex; align-items: center; gap: 8px; }
+  .rc-next-month h4::before { content: "📅"; }
+  .rc-next-month p { margin: 0; font-size: 13px; line-height: 1.7; color: #831843; white-space: pre-wrap; font-weight: 600; }
+
+  .rc-levels { background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%); border: 1px solid #818CF8; border-radius: 14px; padding: 22px; margin-bottom: 28px; }
+  .rc-levels h4 { margin: 0 0 12px; font-family: var(--font-heading); font-weight: 800; font-size: 15px; color: #3730A3; display: flex; align-items: center; gap: 8px; }
+  .rc-levels h4::before { content: "🎯"; }
+  .rc-levels-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .rc-level-box { background: #FFF; border: 2px solid var(--line); border-radius: 12px; padding: 16px; text-align: center; }
+  .rc-level-box .label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 800; margin-bottom: 6px; font-family: var(--font-heading); }
+  .rc-level-box .value { font-size: 18px; font-weight: 800; color: var(--primary-navy); font-family: var(--font-heading); }
+  .rc-level-box.current { border-color: #F59E0B; background: #FFFBEB; }
+  .rc-level-box.current .value { color: #D97706; }
+  .rc-level-box.target { border-color: #10B981; background: #F0FDF4; }
+  .rc-level-box.target .value { color: #166534; }
+
   .rc-foot { display: flex; justify-content: space-between; align-items: flex-end; border-top: 2px solid var(--line); padding-top: 24px; }
   .rc-sign { font-size: 12px; color: var(--text-muted); font-weight: 600; }
   .rc-sign .line { width: 220px; border-bottom: 2px solid var(--primary-navy); margin-bottom: 8px; height: 35px; display: flex; align-items: flex-end; font-family: var(--font-serif); font-style: italic; font-size: 17px; color: var(--primary-navy); font-weight: 700; padding-bottom: 4px; transition: border-color 0.3s ease; }
@@ -363,6 +390,29 @@
 
       <div class="row2">
         <div class="field">
+          <label for="currentLevel">Current Student Level</label>
+          <select id="currentLevel">
+            <option value="">-- Select Level --</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+            <option value="Elite">Elite</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="nextLevel">Next Target Level</label>
+          <select id="nextLevel">
+            <option value="">-- Select Target Level --</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+            <option value="Elite">Elite</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="field">
           <label for="reportMonth">Report Month</label>
           <input type="month" id="reportMonth" />
         </div>
@@ -429,6 +479,9 @@
       <div class="field"><label for="improve">Areas to improve</label><textarea id="improve" placeholder="e.g. Still rushing in the opening."></textarea></div>
       <div class="field"><label for="homework">Homework / next steps</label><textarea id="homework" placeholder="e.g. Solve 10 fork puzzles before next class."></textarea></div>
       <div class="field" style="margin-bottom:6px;"><label for="specialNote">Special Notes / Coach Comments</label><textarea id="specialNote" placeholder="e.g. Exhibited great focus, sportsmanship or special learning comments..."></textarea></div>
+      <div class="field" style="margin-bottom:6px;"><label for="coachCommitment">Coach Commitment to Parents</label><textarea id="coachCommitment" placeholder="e.g. I promise to help the student achieve the next level rating within the committed timeframe..."></textarea></div>
+      <div class="field" style="margin-bottom:6px;"><label for="studentGoal">Student Goal & Dreams</label><textarea id="studentGoal" placeholder="e.g. I want to be featured on the ChessKidoo Academy website as a top performing student..."></textarea></div>
+      <div class="field"><label for="nextMonthCommitment">Next Month Commitment</label><textarea id="nextMonthCommitment" placeholder="e.g. Will solve 50 tactical puzzles per week and improve rating by at least 50 points..."></textarea></div>
 
       <div class="button-group">
         <button class="gen-btn" id="generateBtn">Update Report</button>
@@ -849,6 +902,9 @@
       var improve = document.getElementById("improve").value.trim();
       var homework = document.getElementById("homework").value.trim();
       var specialNote = document.getElementById("specialNote").value.trim();
+      var coachCommitment = document.getElementById("coachCommitment").value.trim();
+      var studentGoal = document.getElementById("studentGoal").value.trim();
+      var nextMonthCommitment = document.getElementById("nextMonthCommitment").value.trim();
       var theme = document.getElementById("themeSelect").value;
       var rtList = CATEGORIES.map(function(cat){ return ratings[cat] || 0; }).join(",");
 
@@ -862,6 +918,11 @@
                                 "&im=" + encodeURIComponent(improve) +
                                 "&hw=" + encodeURIComponent(homework) +
                                 "&sn=" + encodeURIComponent(specialNote) +
+                                "&cc=" + encodeURIComponent(coachCommitment) +
+                                "&sg=" + encodeURIComponent(studentGoal) +
+                                "&nm=" + encodeURIComponent(nextMonthCommitment) +
+                                "&cl=" + encodeURIComponent(currentLevel) +
+                                "&nl=" + encodeURIComponent(nextLevel) +
                                 "&th=" + encodeURIComponent(theme) +
                                 "&rt=" + encodeURIComponent(rtList);
     }
@@ -909,6 +970,11 @@
     var improve = document.getElementById("improve").value.trim();
     var homework = document.getElementById("homework").value.trim();
     var specialNote = document.getElementById("specialNote").value.trim();
+    var coachCommitment = document.getElementById("coachCommitment").value.trim();
+    var studentGoal = document.getElementById("studentGoal").value.trim();
+    var nextMonthCommitment = document.getElementById("nextMonthCommitment").value.trim();
+    var currentLevel = document.getElementById("currentLevel").value;
+    var nextLevel = document.getElementById("nextLevel").value;
 
     var ratedCats = CATEGORIES.filter(function(c){ return ratings[c]; });
     var avg = ratedCats.length ? ratedCats.reduce(function(a,c){ return a + ratings[c]; }, 0) / ratedCats.length : 0;
@@ -930,10 +996,30 @@
       currentLogo = defaultSvg;
     }
 
-    // Render Special Notes conditionally so it does not take up empty space if not provided
+    // Render conditional sections so they do not take up empty space if not provided
     var specialNoteHtml = "";
     if (specialNote) {
       specialNoteHtml = '<div class="rc-special-note"><h4>Special Notes</h4><p>' + esc(specialNote) + '</p></div>';
+    }
+    var coachCommitmentHtml = "";
+    if (coachCommitment) {
+      coachCommitmentHtml = '<div class="rc-commitment"><h4>Coach Commitment to Parents</h4><p>' + esc(coachCommitment) + '</p></div>';
+    }
+    var studentGoalHtml = "";
+    if (studentGoal) {
+      studentGoalHtml = '<div class="rc-goals"><h4>Student Goals &amp; Dreams</h4><p>' + esc(studentGoal) + '</p></div>';
+    }
+    var nextMonthCommitmentHtml = "";
+    if (nextMonthCommitment) {
+      nextMonthCommitmentHtml = '<div class="rc-next-month"><h4>Next Month Commitment</h4><p>' + esc(nextMonthCommitment) + '</p></div>';
+    }
+    var levelsHtml = "";
+    if (currentLevel || nextLevel) {
+      levelsHtml = '<div class="rc-levels"><h4>Student Level Journey</h4>' +
+        '<div class="rc-levels-grid">' +
+          '<div class="rc-level-box current"><div class="label">Current Level</div><div class="value">' + esc(currentLevel || "—") + '</div></div>' +
+          '<div class="rc-level-box target"><div class="label">Next Target Level</div><div class="value">' + esc(nextLevel || "—") + '</div></div>' +
+        '</div></div>';
     }
 
     var html =
@@ -946,9 +1032,13 @@
           '<div><h2>'+esc(student)+'</h2><div class="sub">Topics covered: <span>'+(topics?esc(topics):'—')+'</span></div></div>' +
           '<div class="verdict-badge">'+esc(verdict.label)+(ratedCats.length?'<span class="vscore">'+avg.toFixed(1)+' / 5</span>':'')+'</div>' +
         '</div>' +
+        levelsHtml +
         '<table class="rc-ratings"><thead><tr><th style="width:30%;">Category</th><th style="width:25%;">Rating</th><th style="width:20%;">Feedback</th><th>Score</th></tr></thead><tbody>'+rowsHtml+'</tbody></table>' +
         '<div class="rc-notes-grid"><div class="rc-note-box"><h4>Strengths shown</h4><p>'+(strengths?esc(strengths):'No notes added.')+'</p></div><div class="rc-note-box"><h4>Areas to improve</h4><p>'+(improve?esc(improve):'No notes added.')+'</p></div></div>' +
         specialNoteHtml +
+        coachCommitmentHtml +
+        studentGoalHtml +
+        nextMonthCommitmentHtml +
         '<div class="rc-homework"><h4>Homework &amp; next steps</h4><p>'+(homework?esc(homework):'No homework set.')+'</p></div>' +
         '<div class="rc-foot"><div class="rc-sign"><div class="line">'+esc(coach)+'</div>Coach signature</div><div class="rc-watermark">Generated '+generatedOn+' · ChessKidoo</div></div>' +
       '</div>';
@@ -1004,6 +1094,11 @@
       document.getElementById("improve").value = "";
       document.getElementById("homework").value = "";
       document.getElementById("specialNote").value = "";
+      document.getElementById("coachCommitment").value = "";
+      document.getElementById("studentGoal").value = "";
+      document.getElementById("nextMonthCommitment").value = "";
+      document.getElementById("currentLevel").value = "";
+      document.getElementById("nextLevel").value = "";
       document.getElementById("parentPhone").value = "";
       document.getElementById("reportLink").value = "";
       
@@ -1075,6 +1170,11 @@
     if (params.im) document.getElementById("improve").value = params.im;
     if (params.hw) document.getElementById("homework").value = params.hw;
     if (params.sn) document.getElementById("specialNote").value = params.sn;
+    if (params.cc) document.getElementById("coachCommitment").value = params.cc;
+    if (params.sg) document.getElementById("studentGoal").value = params.sg;
+    if (params.nm) document.getElementById("nextMonthCommitment").value = params.nm;
+    if (params.cl) document.getElementById("currentLevel").value = params.cl;
+    if (params.nl) document.getElementById("nextLevel").value = params.nl;
     if (params.th) {
       document.getElementById("themeSelect").value = params.th;
       applyTheme(params.th);
