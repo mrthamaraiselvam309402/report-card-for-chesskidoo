@@ -557,6 +557,15 @@
     return {label:"Needs Attention", note:"Revisit fundamentals next session."};
   }
 
+  function getRatingText(score) {
+    if (score === 5) return "Excellent";
+    if (score === 4) return "Very Good";
+    if (score === 3) return "Good";
+    if (score === 2) return "Fair";
+    if (score === 1) return "Needs Work";
+    return "Not Rated";
+  }
+
   // Escape HTML helper
   function esc(s){ 
     if (!s) return "";
@@ -626,7 +635,8 @@
       return '<tr><td class="rc-cat">'+esc(cat)+'</td><td>'+generateStarsHtml(score)+'</td><td class="rc-word">'+word+'</td><td><div class="rc-bar-track"><div class="rc-bar-fill" style="width:'+pct+'%;"></div></div></td></tr>';
     }).join("");
 
-    var generatedOn = today.toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
+    var now = new Date();
+    var generatedOn = now.toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
 
     // Fallback if logo fails
     var currentLogo = currentLogoSrc;
