@@ -149,6 +149,37 @@
   .pdf-btn:hover:not(:disabled) { background: var(--primary-navy); color: #FFF; }
   .pdf-btn:disabled { opacity: 0.5; cursor: not-allowed; border-color: var(--text-muted); color: var(--text-muted); }
 
+  /* ---------- WHATSAPP SHARING BUTTONS ---------- */
+  .share-btn {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid #128C7E;
+    border-radius: 12px;
+    background: transparent;
+    color: #128C7E;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .share-btn:hover:not(:disabled) {
+    background: #25D366;
+    color: #FFF;
+    border-color: #25D366;
+    transform: translateY(-1px);
+  }
+  .share-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: var(--text-muted);
+    color: var(--text-muted);
+  }
+
   /* ---------- REPORT PREVIEW ---------- */
   .preview-shell { padding: 35px; background: var(--bg-color); border: none; box-shadow: none; }
   .preview-shell > .preview-label { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
@@ -271,12 +302,12 @@
 
       <div class="row2">
         <div class="field">
-          <label for="coachSelect">Coach Name<span class="required">*</span> <span class="hint">(Type to search/add)</span></label>
+          <label for="coachSelect">Coach Name<span class="required">*</span> <span class="hint">(Type to search)</span></label>
           <input type="text" id="coachSelect" list="coachesDatalist" placeholder="Select or type coach name…" />
           <datalist id="coachesDatalist"></datalist>
         </div>
         <div class="field">
-          <label for="studentSelect">Student Name<span class="required">*</span> <span class="hint">(Type to search/add)</span></label>
+          <label for="studentSelect">Student Name<span class="required">*</span> <span class="hint">(Type to search)</span></label>
           <input type="text" id="studentSelect" list="studentsDatalist" placeholder="Select or type student name…" />
           <datalist id="studentsDatalist"></datalist>
         </div>
@@ -299,9 +330,30 @@
           </select>
         </div>
         <div class="field">
-          <label for="topics">Topics Covered <span class="hint">e.g. Italian Game, fork</span></label>
+          <label for="topics">Topics Covered <span class="hint">e.g. Italian Game</span></label>
           <input type="text" id="topics" placeholder="What did you teach this session?" />
         </div>
+      </div>
+
+      <hr class="divider">
+
+      <p class="section-title"><span class="pip"></span>WhatsApp Sharing Settings</p>
+      <p class="section-note">Configure phone numbers and links for instant WhatsApp report sharing.</p>
+
+      <div class="row2">
+        <div class="field">
+          <label for="coachPhone">Coach WhatsApp Number <span class="hint">(With country code)</span></label>
+          <input type="text" id="coachPhone" placeholder="e.g. 918056616528" />
+        </div>
+        <div class="field">
+          <label for="parentPhone">Parent WhatsApp Number <span class="hint">(With country code)</span></label>
+          <input type="text" id="parentPhone" placeholder="e.g. 919876543210" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="reportLink">Report PDF Share Link <span class="hint">(Optional - GDrive / Dropbox)</span></label>
+        <input type="text" id="reportLink" placeholder="e.g. https://drive.google.com/file/d/..." />
       </div>
 
       <hr class="divider">
@@ -323,6 +375,10 @@
         <button class="reset-btn" id="resetBtn" title="Reset all student details">Clear</button>
       </div>
       <button class="pdf-btn" id="pdfBtn" disabled>Download PDF</button>
+      <div class="row2" style="margin-top: 12px; gap: 12px;">
+        <button class="share-btn" id="shareParentBtn" disabled><span>💬</span> Share with Parent</button>
+        <button class="share-btn" id="shareCoachBtn" disabled><span>💬</span> Share with Coach</button>
+      </div>
     </div>
 
     <!-- ================= PREVIEW PANEL ================= -->
@@ -381,7 +437,29 @@
   });
 
   // ---------- DATA ----------
-  var COACHES = ["ARIVUSELVAM","GYANASURYA","VISHNU","YOGESH","RAMESH SIR - OFFLINE","RANJITH","SUDHIN","ROHITH SELVARAJ"];
+  var COACHES = [
+    "ARIVUSELVAM",
+    "GYANASURYA",
+    "VISHNU",
+    "YOGESH",
+    "RAMESH SIR - OFFLINE",
+    "RANJITH",
+    "SUDHIN",
+    "ROHITH SELVARAJ",
+    "SHANMUGA PANDIYAN"
+  ];
+
+  var COACH_PHONES = {
+    "RAMESH SIR - OFFLINE": "918056616528",
+    "SHANMUGA PANDIYAN": "917339201575",
+    "RANJITH": "919025846663",
+    "ARIVUSELVAM": "917550151974",
+    "VISHNU": "916379175193",
+    "ROHITH SELVARAJ": "9185688722",
+    "GYANASURYA": "917904776060",
+    "YOGESH": "918056735058"
+  };
+
   var STUDENTS = [
     "AADHAVAN - SINGAPORE",
     "AARA V",
@@ -454,15 +532,35 @@
   fillDatalist("coachesDatalist", COACHES);
   fillDatalist("studentsDatalist", STUDENTS);
 
-  // Restore Coach from LocalStorage if exists
+  // Restore Coach and Coach Phone from LocalStorage
   var savedCoach = localStorage.getItem('chesskidoo_coach');
   if (savedCoach) {
     document.getElementById("coachSelect").value = savedCoach;
   }
+  var savedCoachPhone = localStorage.getItem('chesskidoo_coach_phone');
+  if (savedCoachPhone) {
+    document.getElementById("coachPhone").value = savedCoachPhone;
+  }
 
-  // Save selected coach to LocalStorage (runs immediately on typing or selection)
+  // Save selected coach to LocalStorage and auto-fill their phone number if found
   document.getElementById("coachSelect").addEventListener("input", function() {
+    var val = this.value.trim().toUpperCase();
+    var foundPhone = "";
+    for (var key in COACH_PHONES) {
+      if (key.toUpperCase() === val) {
+        foundPhone = COACH_PHONES[key];
+        break;
+      }
+    }
+    if (foundPhone) {
+      document.getElementById("coachPhone").value = foundPhone;
+      localStorage.setItem('chesskidoo_coach_phone', foundPhone);
+    }
     localStorage.setItem('chesskidoo_coach', this.value.trim());
+  });
+
+  document.getElementById("coachPhone").addEventListener("input", function() {
+    localStorage.setItem('chesskidoo_coach_phone', this.value.trim());
   });
 
   var today = new Date();
@@ -600,6 +698,58 @@
     }, 3000);
   }
 
+  function cleanPhone(num) {
+    if (!num) return "";
+    return num.replace(/\D/g, "");
+  }
+
+  // ---------- BUILD WHATSAPP MESSAGE TEXT ----------
+  function buildWhatsAppMessage() {
+    var student = document.getElementById("studentSelect").value.trim() || "Student";
+    var coach = document.getElementById("coachSelect").value.trim() || "Coach";
+    var sessionDate = document.getElementById("sessionDate").value;
+    var nextDate = document.getElementById("nextDate").value;
+    var topics = document.getElementById("topics").value.trim();
+    var strengths = document.getElementById("strengths").value.trim();
+    var improve = document.getElementById("improve").value.trim();
+    var homework = document.getElementById("homework").value.trim();
+    var reportLink = document.getElementById("reportLink").value.trim();
+
+    var msg = "*ChessKidoo Progress Report* 🏆\n\n";
+    msg += "*Student:* " + student + "\n";
+    msg += "*Coach:* " + coach + "\n";
+    msg += "*Session Date:* " + fmtDate(sessionDate) + "\n";
+    if (nextDate) { msg += "*Next Session:* " + fmtDate(nextDate) + "\n"; }
+    if (topics) { msg += "*Topics Covered:* " + topics + "\n"; }
+    
+    // Add performance ratings summary
+    var ratedCats = CATEGORIES.filter(function(c){ return ratings[c]; });
+    if (ratedCats.length > 0) {
+      msg += "\n*Performance Ratings:*\n";
+      ratedCats.forEach(function(cat) {
+        var score = ratings[cat];
+        var stars = "";
+        for (var i = 0; i < score; i++) { stars += "⭐"; }
+        msg += "• " + cat + ": " + stars + " (" + getRatingText(score) + ")\n";
+      });
+      var avg = ratedCats.reduce(function(a,c){ return a + ratings[c]; }, 0) / ratedCats.length;
+      var verdict = verdictFor(avg);
+      msg += "*Overall Rating:* " + avg.toFixed(1) + " / 5 (" + verdict.label + ")\n";
+    }
+
+    if (strengths) { msg += "\n*Strengths:* " + strengths + "\n"; }
+    if (improve) { msg += "\n*Areas to Improve:* " + improve + "\n"; }
+    if (homework) { msg += "\n*Homework:* " + homework + "\n"; }
+    
+    if (reportLink) {
+      msg += "\n*Download PDF Report:* " + reportLink + "\n";
+    }
+    
+    msg += "\nThank you for choosing ChessKidoo! ♟️";
+    
+    return encodeURIComponent(msg);
+  }
+
   // ---------- GENERATE REPORT ----------
   document.getElementById("generateBtn").addEventListener("click", function(){
     var coach = document.getElementById("coachSelect").value.trim();
@@ -662,7 +812,11 @@
 
     document.getElementById("reportWrapper").innerHTML = html;
     document.getElementById("statusText").textContent = "Report ready for " + student;
+    
+    // Enable Action Buttons
     document.getElementById("pdfBtn").disabled = false;
+    document.getElementById("shareParentBtn").disabled = false;
+    document.getElementById("shareCoachBtn").disabled = false;
     
     showToast("Report updated successfully!");
 
@@ -670,6 +824,29 @@
     if (window.innerWidth <= 980) {
       document.getElementById("previewPanel").scrollIntoView({ behavior: 'smooth' });
     }
+  });
+
+  // ---------- WHATSAPP REDIRECT CLICK LISTENERS ----------
+  document.getElementById("shareParentBtn").addEventListener("click", function(){
+    var parentPhone = cleanPhone(document.getElementById("parentPhone").value);
+    if (!parentPhone) {
+      alert("Please enter a parent phone number (with country code, e.g. 91...)");
+      return;
+    }
+    var msg = buildWhatsAppMessage();
+    var url = "https://api.whatsapp.com/send?phone=" + parentPhone + "&text=" + msg;
+    window.open(url, "_blank");
+  });
+
+  document.getElementById("shareCoachBtn").addEventListener("click", function(){
+    var coachPhone = cleanPhone(document.getElementById("coachPhone").value);
+    if (!coachPhone) {
+      alert("Please enter a coach phone number (with country code, e.g. 91...)");
+      return;
+    }
+    var msg = buildWhatsAppMessage();
+    var url = "https://api.whatsapp.com/send?phone=" + coachPhone + "&text=" + msg;
+    window.open(url, "_blank");
   });
 
   // ---------- RESET FORM ----------
@@ -681,6 +858,8 @@
       document.getElementById("improve").value = "";
       document.getElementById("homework").value = "";
       document.getElementById("nextDate").value = "";
+      document.getElementById("parentPhone").value = "";
+      document.getElementById("reportLink").value = "";
       
       // Clear ratings state
       ratings = {};
@@ -698,7 +877,11 @@
           '<p>Choose a coach and student on the left, set your star ratings, and click "Update Report" to generate the scorecard.</p>' +
         '</div>';
       document.getElementById("statusText").textContent = "Fill in the form to begin";
+      
+      // Disable buttons
       document.getElementById("pdfBtn").disabled = true;
+      document.getElementById("shareParentBtn").disabled = true;
+      document.getElementById("shareCoachBtn").disabled = true;
       
       showToast("Form cleared.");
     }
