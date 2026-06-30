@@ -268,6 +268,11 @@
   .rc-note-box h4::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-red); display: inline-block; }
   .rc-note-box p { margin: 0; font-size: 13px; line-height: 1.7; color: var(--text-muted); white-space: pre-wrap; font-weight: 600; }
 
+  .rc-special-note { background: #FFFBEB; border: 1px dashed #F59E0B; border-radius: 14px; padding: 22px; margin-bottom: 28px; }
+  .rc-special-note h4 { margin: 0 0 10px; font-family: var(--font-heading); font-weight: 800; font-size: 15px; color: #D97706; display: flex; align-items: center; gap: 8px; }
+  .rc-special-note h4::before { content: "✨"; }
+  .rc-special-note p { margin: 0; font-size: 13px; line-height: 1.7; color: #78350F; white-space: pre-wrap; font-weight: 600; }
+
   .rc-homework { background: var(--primary-navy); color: #FFF; border-radius: 14px; padding: 22px 28px; margin-bottom: 28px; transition: background 0.3s ease; }
   .rc-homework h4 { margin: 0 0 10px; font-family: var(--font-heading); font-weight: 800; font-size: 15px; color: var(--accent-yellow); }
   .rc-homework p { margin: 0; font-size: 13px; line-height: 1.7; color: #E2E8F0; white-space: pre-wrap; font-weight: 600; }
@@ -414,7 +419,8 @@
       <p class="section-title"><span class="pip"></span>Coach's Notes</p>
       <div class="field"><label for="strengths">Strengths shown this session</label><textarea id="strengths" placeholder="e.g. Spotted the pin on move 14 without prompting."></textarea></div>
       <div class="field"><label for="improve">Areas to improve</label><textarea id="improve" placeholder="e.g. Still rushing in the opening."></textarea></div>
-      <div class="field" style="margin-bottom:6px;"><label for="homework">Homework / next steps</label><textarea id="homework" placeholder="e.g. Solve 10 fork puzzles before next class."></textarea></div>
+      <div class="field"><label for="homework">Homework / next steps</label><textarea id="homework" placeholder="e.g. Solve 10 fork puzzles before next class."></textarea></div>
+      <div class="field" style="margin-bottom:6px;"><label for="specialNote">Special Notes / Coach Comments</label><textarea id="specialNote" placeholder="e.g. Exhibited great focus, sportsmanship or special learning comments..."></textarea></div>
 
       <div class="button-group">
         <button class="gen-btn" id="generateBtn">Update Report</button>
@@ -774,6 +780,7 @@
     html += '</span>'; return html;
   }
 
+  // Toast notifier
   function showToast(msg) {
     var toast = document.getElementById("toast");
     toast.textContent = msg;
@@ -833,6 +840,7 @@
       var strengths = document.getElementById("strengths").value.trim();
       var improve = document.getElementById("improve").value.trim();
       var homework = document.getElementById("homework").value.trim();
+      var specialNote = document.getElementById("specialNote").value.trim();
       var theme = document.getElementById("themeSelect").value;
       var rtList = CATEGORIES.map(function(cat){ return ratings[cat] || 0; }).join(",");
 
@@ -845,6 +853,7 @@
                                 "&st=" + encodeURIComponent(strengths) +
                                 "&im=" + encodeURIComponent(improve) +
                                 "&hw=" + encodeURIComponent(homework) +
+                                "&sn=" + encodeURIComponent(specialNote) +
                                 "&th=" + encodeURIComponent(theme) +
                                 "&rt=" + encodeURIComponent(rtList);
     }
@@ -891,6 +900,7 @@
     var strengths = document.getElementById("strengths").value.trim();
     var improve = document.getElementById("improve").value.trim();
     var homework = document.getElementById("homework").value.trim();
+    var specialNote = document.getElementById("specialNote").value.trim();
 
     var ratedCats = CATEGORIES.filter(function(c){ return ratings[c]; });
     var avg = ratedCats.length ? ratedCats.reduce(function(a,c){ return a + ratings[c]; }, 0) / ratedCats.length : 0;
@@ -912,6 +922,12 @@
       currentLogo = defaultSvg;
     }
 
+    // Render Special Notes conditionally so it does not take up empty space if not provided
+    var specialNoteHtml = "";
+    if (specialNote) {
+      specialNoteHtml = '<div class="rc-special-note"><h4>Special Notes</h4><p>' + esc(specialNote) + '</p></div>';
+    }
+
     var html =
       '<div id="report-card">' +
         '<div class="rc-top">' +
@@ -924,6 +940,7 @@
         '</div>' +
         '<table class="rc-ratings"><thead><tr><th style="width:30%;">Category</th><th style="width:25%;">Rating</th><th style="width:20%;">Feedback</th><th>Score</th></tr></thead><tbody>'+rowsHtml+'</tbody></table>' +
         '<div class="rc-notes-grid"><div class="rc-note-box"><h4>Strengths shown</h4><p>'+(strengths?esc(strengths):'No notes added.')+'</p></div><div class="rc-note-box"><h4>Areas to improve</h4><p>'+(improve?esc(improve):'No notes added.')+'</p></div></div>' +
+        specialNoteHtml +
         '<div class="rc-homework"><h4>Homework &amp; next steps</h4><p>'+(homework?esc(homework):'No homework set.')+'</p></div>' +
         '<div class="rc-foot"><div class="rc-sign"><div class="line">'+esc(coach)+'</div>Coach signature</div><div class="rc-watermark">Generated '+generatedOn+' · ChessKidoo</div></div>' +
       '</div>';
@@ -978,6 +995,7 @@
       document.getElementById("strengths").value = "";
       document.getElementById("improve").value = "";
       document.getElementById("homework").value = "";
+      document.getElementById("specialNote").value = "";
       document.getElementById("parentPhone").value = "";
       document.getElementById("reportLink").value = "";
       
@@ -1048,6 +1066,7 @@
     if (params.st) document.getElementById("strengths").value = params.st;
     if (params.im) document.getElementById("improve").value = params.im;
     if (params.hw) document.getElementById("homework").value = params.hw;
+    if (params.sn) document.getElementById("specialNote").value = params.sn;
     if (params.th) {
       document.getElementById("themeSelect").value = params.th;
       applyTheme(params.th);
